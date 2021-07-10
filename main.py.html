@@ -1,0 +1,177 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #c792ea; font-style: italic;}
+.s1 { color: #959dcb;}
+.s2 { color: #89ddff;}
+.s3 { color: #c3e88d;}
+.s4 { color: #676e95; font-style: italic;}
+.s5 { color: #f78c6c;}
+</style>
+</head>
+<body bgcolor="#292d3e">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">os</span><span class="s2">, </span><span class="s1">os</span><span class="s2">.</span><span class="s1">path</span>
+<span class="s0">import </span><span class="s1">shutil</span>
+<span class="s1">src </span><span class="s2">= </span><span class="s3">r&quot;C:\Users\Photos&quot;</span>
+<span class="s1">dest </span><span class="s2">= </span><span class="s3">r&quot;C:\Users\Test&quot;</span>
+
+<span class="s1">srcproper </span><span class="s2">= </span><span class="s1">os</span><span class="s2">.</span><span class="s1">listdir</span><span class="s2">(</span><span class="s1">src</span><span class="s2">)</span>
+<span class="s1">numberoffiles </span><span class="s2">= </span><span class="s1">len</span><span class="s2">(</span><span class="s1">srcproper</span><span class="s2">)</span>
+<span class="s0">import </span><span class="s1">PIL</span><span class="s2">.</span><span class="s1">Image</span>
+<span class="s0">from </span><span class="s1">PIL </span><span class="s0">import </span><span class="s1">Image</span>
+<span class="s0">from </span><span class="s1">PIL</span><span class="s2">.</span><span class="s1">ExifTags </span><span class="s0">import </span><span class="s1">TAGS</span><span class="s2">, </span><span class="s1">GPSTAGS</span>
+<span class="s1">finalpicture </span><span class="s2">= []</span>
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">srcproper</span><span class="s2">:</span>
+    <span class="s1">full_path </span><span class="s2">= </span><span class="s1">os</span><span class="s2">.</span><span class="s1">path</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s1">src</span><span class="s2">, </span><span class="s1">i</span><span class="s2">)</span>
+    <span class="s0">def </span><span class="s1">get_exif</span><span class="s2">(</span><span class="s1">i</span><span class="s2">):</span>
+        <span class="s1">image </span><span class="s2">= </span><span class="s1">Image</span><span class="s2">.</span><span class="s1">open</span><span class="s2">(</span><span class="s1">full_path</span><span class="s2">)</span>
+        <span class="s1">image</span><span class="s2">.</span><span class="s1">verify</span><span class="s2">()</span>
+        <span class="s0">return </span><span class="s1">image</span><span class="s2">.</span><span class="s1">_getexif</span><span class="s2">()</span>
+
+    <span class="s1">exif </span><span class="s2">= </span><span class="s1">get_exif</span><span class="s2">(</span><span class="s1">i</span><span class="s2">)</span>
+    <span class="s4">#print(exif)</span>
+
+
+    <span class="s0">def </span><span class="s1">get_labeled_exif</span><span class="s2">(</span><span class="s1">exif</span><span class="s2">):</span>
+        <span class="s0">for </span><span class="s1">path </span><span class="s0">in </span><span class="s1">srcproper</span><span class="s2">:</span>
+            <span class="s1">labeled </span><span class="s2">= {}</span>
+            <span class="s0">for </span><span class="s2">(</span><span class="s1">key</span><span class="s2">, </span><span class="s1">val</span><span class="s2">) </span><span class="s0">in </span><span class="s1">exif</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+                <span class="s1">labeled</span><span class="s2">[</span><span class="s1">TAGS</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">key</span><span class="s2">)] = </span><span class="s1">val</span>
+
+            <span class="s0">return </span><span class="s1">labeled</span>
+
+    <span class="s1">labeled </span><span class="s2">= </span><span class="s1">get_labeled_exif</span><span class="s2">(</span><span class="s1">exif</span><span class="s2">)</span>
+   <span class="s4">#print(labeled)</span>
+
+    <span class="s0">def </span><span class="s1">get_geotagging</span><span class="s2">(</span><span class="s1">exif</span><span class="s2">):</span>
+        <span class="s0">if not </span><span class="s1">exif</span><span class="s2">:</span>
+            <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s3">&quot;No EXIF metadata found&quot;</span><span class="s2">)</span>
+
+        <span class="s1">geotagging </span><span class="s2">= {}</span>
+        <span class="s0">for </span><span class="s2">(</span><span class="s1">idx</span><span class="s2">, </span><span class="s1">tag</span><span class="s2">) </span><span class="s0">in </span><span class="s1">TAGS</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+            <span class="s0">if </span><span class="s1">tag </span><span class="s2">== </span><span class="s3">'GPSInfo'</span><span class="s2">:</span>
+                <span class="s0">if </span><span class="s1">idx </span><span class="s0">not in </span><span class="s1">exif</span><span class="s2">:</span>
+                    <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s3">&quot;No EXIF geotagging found&quot;</span><span class="s2">)</span>
+
+                <span class="s0">for </span><span class="s2">(</span><span class="s1">key</span><span class="s2">, </span><span class="s1">val</span><span class="s2">) </span><span class="s0">in </span><span class="s1">GPSTAGS</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+                    <span class="s0">if </span><span class="s1">key </span><span class="s0">in </span><span class="s1">exif</span><span class="s2">[</span><span class="s1">idx</span><span class="s2">]:</span>
+                        <span class="s1">geotagging</span><span class="s2">[</span><span class="s1">val</span><span class="s2">] = </span><span class="s1">exif</span><span class="s2">[</span><span class="s1">idx</span><span class="s2">][</span><span class="s1">key</span><span class="s2">]</span>
+
+        <span class="s0">return </span><span class="s1">geotagging</span>
+
+    <span class="s1">exif </span><span class="s2">= </span><span class="s1">get_exif</span><span class="s2">(</span><span class="s1">full_path</span><span class="s2">)</span>
+    <span class="s1">geotags </span><span class="s2">= </span><span class="s1">get_geotagging</span><span class="s2">(</span><span class="s1">exif</span><span class="s2">)</span>
+    <span class="s4">#print(geotags)</span>
+
+
+    <span class="s0">def </span><span class="s1">get_decimal_from_dms</span><span class="s2">(</span><span class="s1">dms</span><span class="s2">, </span><span class="s1">ref</span><span class="s2">):</span>
+        <span class="s1">degrees </span><span class="s2">= </span><span class="s1">dms</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]</span>
+        <span class="s1">minutes </span><span class="s2">= </span><span class="s1">dms</span><span class="s2">[</span><span class="s5">1</span><span class="s2">] / </span><span class="s5">60.0</span>
+        <span class="s1">seconds </span><span class="s2">= </span><span class="s1">dms</span><span class="s2">[</span><span class="s5">2</span><span class="s2">] / </span><span class="s5">3600.0</span>
+
+        <span class="s0">if </span><span class="s1">ref </span><span class="s0">in </span><span class="s2">[</span><span class="s3">'S'</span><span class="s2">, </span><span class="s3">'W'</span><span class="s2">]:</span>
+            <span class="s1">degrees </span><span class="s2">= -</span><span class="s1">degrees</span>
+            <span class="s1">minutes </span><span class="s2">= -</span><span class="s1">minutes</span>
+            <span class="s1">seconds </span><span class="s2">= -</span><span class="s1">seconds</span>
+
+        <span class="s0">return </span><span class="s1">round</span><span class="s2">(</span><span class="s1">degrees </span><span class="s2">+ </span><span class="s1">minutes </span><span class="s2">+ </span><span class="s1">seconds</span><span class="s2">, </span><span class="s5">5</span><span class="s2">)</span>
+
+    <span class="s0">def </span><span class="s1">get_coordinates</span><span class="s2">(</span><span class="s1">geotags</span><span class="s2">):</span>
+        <span class="s1">lat </span><span class="s2">= </span><span class="s1">get_decimal_from_dms</span><span class="s2">(</span><span class="s1">geotags</span><span class="s2">[</span><span class="s3">'GPSLatitude'</span><span class="s2">], </span><span class="s1">geotags</span><span class="s2">[</span><span class="s3">'GPSLatitudeRef'</span><span class="s2">])</span>
+
+        <span class="s1">lon </span><span class="s2">= </span><span class="s1">get_decimal_from_dms</span><span class="s2">(</span><span class="s1">geotags</span><span class="s2">[</span><span class="s3">'GPSLongitude'</span><span class="s2">], </span><span class="s1">geotags</span><span class="s2">[</span><span class="s3">'GPSLongitudeRef'</span><span class="s2">])</span>
+
+        <span class="s0">return </span><span class="s2">(</span><span class="s1">lat</span><span class="s2">,</span><span class="s1">lon</span><span class="s2">)</span>
+    <span class="s1">exif </span><span class="s2">= </span><span class="s1">get_exif</span><span class="s2">(</span><span class="s1">full_path</span><span class="s2">)</span>
+    <span class="s1">geotags </span><span class="s2">= </span><span class="s1">get_geotagging</span><span class="s2">(</span><span class="s1">exif</span><span class="s2">)</span>
+    <span class="s4"># print(get_coordinates(geotags))</span>
+    <span class="s1">picturecoordinates </span><span class="s2">= (</span><span class="s1">get_coordinates</span><span class="s2">(</span><span class="s1">geotags</span><span class="s2">))</span>
+
+    <span class="s4"># print(str(picturecoordinates))</span>
+    <span class="s1">x </span><span class="s2">= (</span><span class="s1">str</span><span class="s2">(</span><span class="s1">picturecoordinates</span><span class="s2">))</span>
+    <span class="s1">finalpicture</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">x</span><span class="s2">)</span>
+<span class="s1">estimates </span><span class="s2">= </span><span class="s3">r&quot;C:\Users\Example\Addresses</span>
+
+<span class="s1">dir_count </span><span class="s2">= </span><span class="s5">0</span>
+<span class="s1">file_count </span><span class="s2">= </span><span class="s5">0</span>
+<span class="s0">for </span><span class="s1">root</span><span class="s2">, </span><span class="s1">dirs</span><span class="s2">, </span><span class="s1">filenames </span><span class="s0">in </span><span class="s1">os</span><span class="s2">.</span><span class="s1">walk</span><span class="s2">(</span><span class="s1">estimates</span><span class="s2">):</span>
+    <span class="s0">for </span><span class="s1">dir </span><span class="s0">in </span><span class="s1">dirs</span><span class="s2">:</span>
+        <span class="s1">dir_count </span><span class="s2">+= </span><span class="s5">1</span>
+    <span class="s0">for </span><span class="s1">file </span><span class="s0">in </span><span class="s1">filenames</span><span class="s2">:</span>
+        <span class="s1">file_count </span><span class="s2">+= </span><span class="s5">1</span>
+<span class="s4"># print('dir_count ', dir_count)</span>
+<span class="s4"># print('file_count ', file_count)</span>
+<span class="s4">#</span>
+<span class="s4">#</span>
+<span class="s4"># print(os.listdir(estimates))</span>
+
+<span class="s1">listofestimates </span><span class="s2">= (</span><span class="s1">os</span><span class="s2">.</span><span class="s1">listdir</span><span class="s2">(</span><span class="s1">estimates</span><span class="s2">))</span>
+<span class="s1">onlyaddresslist </span><span class="s2">= []</span>
+<span class="s4"># GETS A LIST OF ADDRESSES FROM ESTIMATE FOLDER</span>
+
+
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">listofestimates</span><span class="s2">:</span>
+   <span class="s0">try</span><span class="s2">:</span>
+        <span class="s1">i </span><span class="s2">= </span><span class="s1">i</span><span class="s2">[</span><span class="s1">i</span><span class="s2">.</span><span class="s1">rindex</span><span class="s2">(</span><span class="s3">'-'</span><span class="s2">) + </span><span class="s5">1</span><span class="s2">:]</span>
+        <span class="s1">onlyaddresslist</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">i</span><span class="s2">)</span>
+        <span class="s4"># print(i)</span>
+        <span class="s4"># break</span>
+   <span class="s0">except </span><span class="s1">ValueError</span><span class="s2">:</span>
+       <span class="s0">continue</span>
+
+
+<span class="s0">import </span><span class="s1">requests</span>
+<span class="s0">import </span><span class="s1">urllib</span><span class="s2">.</span><span class="s1">parse</span>
+<span class="s0">from </span><span class="s1">geopy</span><span class="s2">.</span><span class="s1">geocoders </span><span class="s0">import </span><span class="s1">Here</span>
+<span class="s1">estimatecoordinates </span><span class="s2">= []</span>
+<span class="s1">estimatelats </span><span class="s2">= []</span>
+<span class="s1">estimatelons </span><span class="s2">= []</span>
+<span class="s1">estimatecombined </span><span class="s2">= []</span>
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">onlyaddresslist</span><span class="s2">:</span>
+    <span class="s0">try</span><span class="s2">:</span>
+        <span class="s1">url </span><span class="s2">= </span><span class="s3">'https://nominatim.openstreetmap.org/search/' </span><span class="s2">+ </span><span class="s1">urllib</span><span class="s2">.</span><span class="s1">parse</span><span class="s2">.</span><span class="s1">quote</span><span class="s2">(</span><span class="s1">i</span><span class="s2">) + </span><span class="s3">'?format=json'</span>
+        <span class="s1">response </span><span class="s2">= </span><span class="s1">requests</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">url</span><span class="s2">).</span><span class="s1">json</span><span class="s2">()</span>
+        <span class="s1">lat </span><span class="s2">= (</span><span class="s1">response</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s3">&quot;lat&quot;</span><span class="s2">])</span>
+        <span class="s1">lon </span><span class="s2">= (</span><span class="s1">response</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s3">&quot;lon&quot;</span><span class="s2">])</span>
+        <span class="s1">estimatelats</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">lat</span><span class="s2">)</span>
+        <span class="s1">estimatelons</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">lon</span><span class="s2">)</span>
+        <span class="s1">strlat </span><span class="s2">= </span><span class="s1">str</span><span class="s2">(</span><span class="s1">lat</span><span class="s2">)</span>
+        <span class="s1">strlon </span><span class="s2">= </span><span class="s1">str</span><span class="s2">(</span><span class="s1">lon</span><span class="s2">)</span>
+        <span class="s1">strcombined </span><span class="s2">= </span><span class="s1">strlat </span><span class="s2">+ </span><span class="s3">&quot;,&quot; </span><span class="s2">+ </span><span class="s1">strlon</span>
+        <span class="s1">estimatecoordinates</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">strcombined</span><span class="s2">)</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s1">lat</span><span class="s2">)</span>
+        <span class="s4"># print (&quot;The cordinates of &quot; + i + &quot;are &quot; + lat , lon)</span>
+    <span class="s0">except </span><span class="s1">IndexError</span><span class="s2">:</span>
+        <span class="s0">continue</span>
+
+<span class="s1">print</span><span class="s2">(</span><span class="s1">estimatecoordinates</span><span class="s2">)</span>
+<span class="s1">picturecoordinateslist </span><span class="s2">= []  </span><span class="s4"># &lt;======================== List of Picture Coordinates</span>
+<span class="s4"># for i in finalpicture:</span>
+<span class="s4">#     print(i)</span>
+<span class="s1">estimatefinalpairs </span><span class="s2">= []</span>
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">estimatelats</span><span class="s2">:</span>
+    <span class="s1">x </span><span class="s2">= </span><span class="s5">0</span>
+    <span class="s1">y </span><span class="s2">= </span><span class="s1">i </span><span class="s2">+ </span><span class="s1">estimatelons</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]</span>
+    <span class="s1">x </span><span class="s2">= </span><span class="s1">x </span><span class="s2">+ </span><span class="s5">1</span>
+    <span class="s1">estimatefinalpairs</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">y</span><span class="s2">)</span>
+
+    <span class="s1">print</span><span class="s2">(</span><span class="s1">y</span><span class="s2">)</span>
+<span class="s4">#</span>
+<span class="s0">from </span><span class="s1">geopy</span><span class="s2">.</span><span class="s1">distance </span><span class="s0">import </span><span class="s1">geodesic</span>
+<span class="s4">#</span>
+<span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">finalpicture</span><span class="s2">:</span>
+    <span class="s1">x </span><span class="s2">= </span><span class="s5">0</span>
+    <span class="s1">y </span><span class="s2">= </span><span class="s1">estimatefinalpairs</span><span class="s2">[</span><span class="s1">x</span><span class="s2">]</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s1">geodesic</span><span class="s2">(</span><span class="s1">i</span><span class="s2">,</span><span class="s1">y</span><span class="s2">).</span><span class="s1">km</span><span class="s2">)</span>
+    <span class="s1">x </span><span class="s2">= </span><span class="s1">x </span><span class="s2">+ </span><span class="s5">1</span>
+
+</pre>
+</body>
+</html>
